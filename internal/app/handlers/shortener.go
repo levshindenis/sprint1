@@ -9,11 +9,11 @@ import (
 	"github.com/levshindenis/sprint1/internal/app/tools"
 )
 
-type API struct {
+type HStorage struct {
 	storages.ServerStorage
 }
 
-func (serv *API) PostHandler(w http.ResponseWriter, r *http.Request) {
+func (serv *HStorage) PostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "There is not true method", http.StatusBadRequest)
 		return
@@ -50,12 +50,10 @@ func (serv *API) PostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (serv *API) GetHandler(w http.ResponseWriter, r *http.Request) {
+func (serv *HStorage) GetHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "There is not true method", http.StatusBadRequest)
 	}
-	//r.URL.Path[1:]
-	//chi.URLParam(r, "id")
 	if _, in := (serv.GetStorage())[r.URL.Path[1:]]; in {
 		w.Header().Add("Location", (serv.GetStorage())[r.URL.Path[1:]])
 		w.WriteHeader(http.StatusTemporaryRedirect)

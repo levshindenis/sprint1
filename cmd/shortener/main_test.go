@@ -13,7 +13,7 @@ import (
 
 func TestStorage_PostHandler(t *testing.T) {
 	var serv struct {
-		handlers.API
+		handlers.HStorage
 	}
 	serv.InitStorage()
 
@@ -68,7 +68,7 @@ func TestStorage_PostHandler(t *testing.T) {
 
 func TestStorage_GetHandler(t *testing.T) {
 	var serv struct {
-		handlers.API
+		handlers.HStorage
 	}
 	serv.InitStorage()
 	serv.SetStorage("GyuRe0", "https://yandex.ru/")
