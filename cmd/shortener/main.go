@@ -2,9 +2,8 @@
 package main
 
 import (
+	"github.com/levshindenis/sprint1/internal/app/routers"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/levshindenis/sprint1/internal/app/handlers"
 )
@@ -18,17 +17,8 @@ func main() {
 
 // функция run будет полезна при инициализации зависимостей сервера перед запуском
 func run() error {
-	var server handlers.API
+	var server handlers.HStorage
 	server.Init()
 
-	return http.ListenAndServe(server.GetStartSA(), MyRouter(server))
-}
-
-func MyRouter(api handlers.API) *chi.Mux {
-	r := chi.NewRouter()
-	r.Route("/", func(r chi.Router) {
-		r.Post("/", api.PostHandler)
-		r.Get("/{id}", api.GetHandler)
-	})
-	return r
+	return http.ListenAndServe(server.GetStartSA(), routers.MyRouter(server))
 }
