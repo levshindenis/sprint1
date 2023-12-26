@@ -11,9 +11,9 @@ import (
 	"github.com/levshindenis/sprint1/internal/app/handlers"
 )
 
-func TestStorage_PostHandler(t *testing.T) {
+func TestHSStorage_PostHandler(t *testing.T) {
 	var serv struct {
-		handlers.API
+		handlers.HStorage
 	}
 	serv.InitStorage()
 
@@ -26,9 +26,9 @@ func TestStorage_PostHandler(t *testing.T) {
 		emptyBody    bool
 	}{
 		{
-			name:   "Good test",
-			method: http.MethodPost,
-
+			name:         "Good test",
+			method:       http.MethodPost,
+			address:      "localhost:8000",
 			requestBody:  "https://yandex.ru/",
 			expectedCode: http.StatusCreated,
 			emptyBody:    false,
@@ -66,9 +66,9 @@ func TestStorage_PostHandler(t *testing.T) {
 	}
 }
 
-func TestStorage_GetHandler(t *testing.T) {
+func TestHSStorage_GetHandler(t *testing.T) {
 	var serv struct {
-		handlers.API
+		handlers.HStorage
 	}
 	serv.InitStorage()
 	serv.SetStorage("GyuRe0", "https://yandex.ru/")
@@ -116,6 +116,75 @@ func TestStorage_GetHandler(t *testing.T) {
 			assert.Equal(t, w.Code, tt.expectedCode, "Код ответа не совпадает с ожидаемым")
 			if !tt.emptyBody {
 				assert.Equal(t, w.Header().Get("Location"), tt.expectedBody,
+					"Тело ответа не совпадает с ожидаемым")
+			}
+		})
+	}
+}
+
+func TestHSStorage_JSONPostHandler(t *testing.T) {
+	var serv struct {
+		handlers.HStorage
+	}
+	serv.InitStorage()
+
+	tests := []struct {
+		name         string
+		method       string
+		address      string
+		requestBody  string
+		contentType  string
+		expectedCode int
+		emptyBody    bool
+	}{
+		{
+			name:         "Good test",
+			method:       http.MethodPost,
+			address:      "localhost:8000",
+			requestBody:  "{\"url\":\"https://practicum.yandex.ru\"}",
+			contentType:  "application/json",
+			expectedCode: http.StatusCreated,
+			emptyBody:    false,
+		},
+		{
+			name:         "Bad JSON test",
+			method:       http.MethodPost,
+			address:      "localhost:8000",
+			requestBody:  "{\"url:\"https://practicum.yandex.ru\"}",
+			contentType:  "application/json",
+			expectedCode: http.StatusBadRequest,
+			emptyBody:    true,
+		},
+		{
+			name:         "Bad Content-Type test",
+			method:       http.MethodPost,
+			address:      "localhost:8000",
+			requestBody:  "{\"url\":\"https://practicum.yandex.ru\"}",
+			contentType:  "text/plain",
+			expectedCode: http.StatusBadRequest,
+			emptyBody:    true,
+		},
+		{
+			name:         "Bad Method test",
+			method:       http.MethodGet,
+			address:      "localhost:8000",
+			requestBody:  "{\"url\":\"https://practicum.yandex.ru\"}",
+			contentType:  "application/json",
+			expectedCode: http.StatusBadRequest,
+			emptyBody:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			serv.SetBaseSA(tt.address)
+			r := httptest.NewRequest(tt.method, "/", strings.NewReader(tt.requestBody))
+			w := httptest.NewRecorder()
+			r.Header.Set("Content-Type", tt.contentType)
+			serv.JSONPostHandler(w, r)
+			assert.Equal(t, w.Code, tt.expectedCode, "Код ответа не совпадает с ожидаемым")
+			if !tt.emptyBody {
+				assert.Contains(t, w.Body.String(), tt.address,
 					"Тело ответа не совпадает с ожидаемым")
 			}
 		})
